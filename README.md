@@ -180,6 +180,44 @@ require('remora').setup({
 
 Use `<Tab>` and `<S-Tab>` to cycle through modes.
 
+#### AI Review Mode
+| Key | Action |
+|-----|--------|
+| `r` | Start full PR review |
+| `f` | Review current file only |
+| `c` | Clear review results |
+| `e` | Export AI findings as draft comments |
+
+#### AI Ask Mode
+| Key | Action |
+|-----|--------|
+| `a` | Ask a question |
+| `c` | Clear conversation |
+
+#### PR Comments Mode
+| Key | Action |
+|-----|--------|
+| `e` | Edit comment |
+| `d` | Delete comment |
+| `s` | Submit review to GitHub |
+
+#### Local Memo Mode
+| Key | Action |
+|-----|--------|
+| `a` | Add TODO |
+| `n` | Add note |
+| `d` | Delete note/TODO |
+| `t` | Toggle TODO completion |
+
+### Diffview Keybindings
+
+When viewing a file in diffview:
+
+| Key | Action |
+|-----|--------|
+| `<leader>rc` | Add review comment at cursor |
+| `<leader>rs` | Add suggestion from visual selection |
+
 ### File View Modes
 
 **Tree Mode** (default):
@@ -257,13 +295,13 @@ All review data is stored locally:
 
 - [x] **Phase 1**: Left pane (File Tree + Memos + PR Home)
 - [x] **Phase 2**: Center pane PR detail screen
-- [ ] **Phase 3**: diffview integration + comment display
-- [ ] **Phase 4**: Right pane mode system
-- [ ] **Phase 5**: AI Review mode (codecompanion integration)
-- [ ] **Phase 6**: GitHub GraphQL (comment/suggestion posting)
-- [ ] **Phase 7**: Review submission (Approve/Request Changes)
+- [x] **Phase 3**: diffview integration + comment display (Hover/Inline)
+- [x] **Phase 4**: Right pane mode system (All 4 modes)
+- [x] **Phase 5**: AI Review mode (Claude CLI + codecompanion integration)
+- [x] **Phase 6**: GitHub GraphQL (comment/suggestion posting)
+- [x] **Phase 7**: Review submission (Approve/Request Changes)
 
-**Current Status**: Phase 1-2 Complete ✅
+**Current Status**: All Phases Complete ✅✅✅
 
 ## Architecture
 
@@ -342,4 +380,36 @@ Built with ❤️ using:
 
 ---
 
-**Note**: This plugin is in active development. Phase 1-2 are complete. Phases 3-7 are planned for upcoming releases. See the roadmap above for details.
+## Features in Detail
+
+### 🔍 diffview.nvim Integration (Phase 3)
+- Open PR files directly in diffview with base...head comparison
+- Hover popup showing comments when cursor hovers over commented lines
+- Inline comment markers with virtual text
+- Add comments/suggestions directly from diffview
+
+### 🎨 Full UI Mode System (Phase 4)
+- **AI Review Mode**: Context-aware AI code reviews with finding extraction
+- **AI Ask Mode**: Direct Q&A with Claude Code, conversation history preserved
+- **PR Comments Mode**: Full draft comment management and submission
+- **Local Memo Mode**: Persistent TODOs and notes (per-PR and global)
+
+### 🤖 AI Integration (Phase 5)
+- **Claude Code CLI**: Direct integration for fast AI interactions
+- **codecompanion.nvim**: Optional enhanced AI experience
+- **Context Injection**: PR description and file changes automatically provided to AI
+- **Smart Parsing**: Automatic extraction of findings with file/line/severity
+
+### 💬 GitHub Operations (Phase 6)
+- **Comment Posting**: Submit individual review comments with diff positions
+- **Suggestions**: GitHub-flavored suggestion blocks (```suggestion syntax)
+- **Batch Comments**: Submit multiple comments in single review
+- **Thread Management**: View and respond to existing comment threads
+
+### ✅ Review Submission (Phase 7)
+- **Review Types**: COMMENT, APPROVE, or REQUEST_CHANGES
+- **Draft System**: All comments stored locally until ready to submit
+- **One-Click Submit**: Submit entire review with all comments at once
+- **Status Tracking**: See review progress in PR summary
+
+**Status**: All features implemented and ready to use! 🎉

@@ -42,6 +42,9 @@ function M.render()
     return
   end
 
+  -- Clear buffer first
+  buffer_utils.set_lines(M.bufnr, {}, { modifiable = true })
+
   local lines = {}
 
   -- Mode tabs
@@ -57,120 +60,31 @@ function M.render()
   table.insert(lines, string.rep('─', 50))
   table.insert(lines, '')
 
-  -- Render mode content
-  local mode_lines = M._render_mode_content()
-  for _, line in ipairs(mode_lines) do
-    table.insert(lines, line)
-  end
+  -- Set tabs first
+  buffer_utils.set_lines(M.bufnr, lines, { modifiable = true })
 
-  -- Update buffer
-  buffer_utils.set_lines(M.bufnr, lines)
+  -- Then delegate to mode-specific renderer to append content
+  M._render_mode_content()
 end
 
 -- Render content for current mode
----@return table lines
 function M._render_mode_content()
   local mode = state.ui.right_pane_mode
 
+  -- Delegate to mode-specific renderers
   if mode == 'ai_review' then
-    return M._render_ai_review()
+    local ai_review = require('remora.ui.modes.ai_review')
+    ai_review.render(M.bufnr)
   elseif mode == 'ai_ask' then
-    return M._render_ai_ask()
+    local ai_ask = require('remora.ui.modes.ai_ask')
+    ai_ask.render(M.bufnr)
   elseif mode == 'pr_comments' then
-    return M._render_pr_comments()
+    local pr_comments = require('remora.ui.modes.pr_comments')
+    pr_comments.render(M.bufnr)
   elseif mode == 'local_memo' then
-    return M._render_local_memo()
+    local local_memo = require('remora.ui.modes.local_memo')
+    local_memo.render(M.bufnr)
   end
-
-  return { 'Unknown mode: ' .. mode }
-end
-
--- Render AI Review mode
----@return table lines
-function M._render_ai_review()
-  local lines = {}
-
-  table.insert(lines, '🤖 AI Review Mode')
-  table.insert(lines, '')
-  table.insert(lines, 'Use this mode to request AI-powered code reviews.')
-  table.insert(lines, '')
-  table.insert(lines, 'Features:')
-  table.insert(lines, '  • Context injection from PR description')
-  table.insert(lines, '  • Automatic issue detection')
-  table.insert(lines, '  • Suggestion generation')
-  table.insert(lines, '')
-  table.insert(lines, 'Commands:')
-  table.insert(lines, '  :RemoraAIReview       Start AI review')
-  table.insert(lines, '  :RemoraAIReviewFile   Review current file')
-  table.insert(lines, '')
-  table.insert(lines, '[AI Review integration coming in Phase 5]')
-
-  return lines
-end
-
--- Render AI Ask mode
----@return table lines
-function M._render_ai_ask()
-  local lines = {}
-
-  table.insert(lines, '💬 AI Ask Mode')
-  table.insert(lines, '')
-  table.insert(lines, 'Use this mode for general questions to Claude Code.')
-  table.insert(lines, '')
-  table.insert(lines, 'Features:')
-  table.insert(lines, '  • No context injection')
-  table.insert(lines, '  • Direct access to Claude Code CLI')
-  table.insert(lines, '  • General programming assistance')
-  table.insert(lines, '')
-  table.insert(lines, 'Commands:')
-  table.insert(lines, '  :RemoraAsk <question>   Ask Claude Code')
-  table.insert(lines, '')
-  table.insert(lines, '[AI Ask integration coming in Phase 5]')
-
-  return lines
-end
-
--- Render PR Comments mode
----@return table lines
-function M._render_pr_comments()
-  local lines = {}
-
-  table.insert(lines, '💬 PR Comments')
-  table.insert(lines, '')
-
-  local draft_count = #state.draft_comments
-
-  if draft_count > 0 then
-    table.insert(lines, string.format('Draft Comments: %d', draft_count))
-    table.insert(lines, '')
-
-    for i, comment in ipairs(state.draft_comments) do
-      table.insert(lines, string.format('%d. %s:%d', i, comment.path, comment.line))
-      table.insert(lines, '   ' .. comment.body)
-      table.insert(lines, '')
-    end
-
-    table.insert(lines, '')
-    table.insert(lines, 'Commands:')
-    table.insert(lines, '  s    Submit review')
-    table.insert(lines, '  d    Delete comment')
-  else
-    table.insert(lines, 'No draft comments')
-    table.insert(lines, '')
-    table.insert(lines, 'To add a comment:')
-    table.insert(lines, '  1. Open a file in diffview')
-    table.insert(lines, '  2. Navigate to a line')
-    table.insert(lines, '  3. Press <leader>rc to add comment')
-  end
-
-  return lines
-end
-
--- Render Local Memo mode
----@return table lines
-function M._render_local_memo()
-  local memos_component = require('remora.ui.components.memos')
-  return memos_component.render_detail()
 end
 
 -- Set up keymaps
