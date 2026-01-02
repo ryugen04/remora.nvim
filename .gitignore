@@ -1,0 +1,19 @@
+# Neovim
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Plugin data (local only)
+*.log
+
+# Test data
+test_data/
+
+# IDE
+.idea/
+.vscode/
+*.iml
