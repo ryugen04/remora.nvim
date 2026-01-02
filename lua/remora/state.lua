@@ -38,6 +38,14 @@ M.draft_comments = {}
 -- AI reviews
 M.ai_reviews = {}
 
+-- Local git changes (unstaged, staged, unpushed commits)
+M.local_changes = {
+  loaded = false,
+  staged = {},           -- { { path, status } }
+  unstaged = {},         -- { { path, status } }
+  unpushed_commits = {}, -- { { sha, message, author, date } }
+}
+
 -- Initialize state
 function M.init()
 	if M.is_initialized then
@@ -271,6 +279,46 @@ function M.add_draft_comment(comment)
 	end
 
 	M.save()
+end
+
+-- Refresh local git changes
+function M.refresh_local_changes()
+  local git = require('remora.core.git')
+  local events = require('remora.events')
+
+  -- git statusを取得
+  git.get_status(function(changes, err)
+    if err then
+      vim.notify('Failed to get git status: ' .. err, vim.log.levels.WARN)
+      return
+    end
+
+    M.local_changes.staged = changes.staged
+    M.local_changes.unstaged = changes.unstaged
+    M.local_changes.loaded = true
+
+    events.emit(events.LOCAL_CHANGES_UPDATED)
+  end)
+
+  -- unpushed commitsを取得
+  if M.current_pr and M.current_pr.base_branch then
+    git.get_unpushed_commits(M.current_pr.base_branch, function(commits, err)
+      if not err then
+        M.local_changes.unpushed_commits = commits
+        events.emit(events.LOCAL_CHANGES_UPDATED)
+      end
+    end)
+  end
+end
+
+-- Reset local changes state
+function M.reset_local_changes()
+  M.local_changes = {
+    loaded = false,
+    staged = {},
+    unstaged = {},
+    unpushed_commits = {},
+  }
 end
 
 return M

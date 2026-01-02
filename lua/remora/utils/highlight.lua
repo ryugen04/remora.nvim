@@ -37,10 +37,31 @@ function M.setup()
 	vim.api.nvim_set_hl(0, "RemoraModeActive", { link = "TabLineSel", default = true })
 	vim.api.nvim_set_hl(0, "RemoraModeInactive", { link = "TabLine", default = true })
 
-	-- Diff highlights
-	vim.api.nvim_set_hl(0, "RemoraDiffAdd", { link = "DiffAdd", default = true })
-	vim.api.nvim_set_hl(0, "RemoraDiffDelete", { link = "DiffDelete", default = true })
-	vim.api.nvim_set_hl(0, "RemoraDiffChange", { link = "DiffChange", default = true })
+	-- Diff highlights (GitHub style - 行全体用)
+	vim.api.nvim_set_hl(0, "RemoraDiffAdd", { bg = "#1c3d2a", default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffDelete", { bg = "#3d1c1c", default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffChange", { bg = "#2d3a1c", default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffPadding", { bg = "#1a1a1e", default = true })
+
+	-- Sign column highlights (GitHub style)
+	vim.api.nvim_set_hl(0, "RemoraDiffSignAdd", { fg = "#3fb950", bg = "#1c3d2a", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffSignDelete", { fg = "#f85149", bg = "#3d1c1c", bold = true, default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffSignChange", { fg = "#d29922", bg = "#2d3a1c", bold = true, default = true })
+
+	-- Line number highlights for diff
+	vim.api.nvim_set_hl(0, "RemoraDiffLineNr", { fg = "#6e7681", default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffLineNrAdd", { fg = "#3fb950", bg = "#1c3d2a", default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffLineNrDelete", { fg = "#f85149", bg = "#3d1c1c", default = true })
+	vim.api.nvim_set_hl(0, "RemoraDiffLineNrChange", { fg = "#d29922", bg = "#2d3a1c", default = true })
+
+	-- Local Changes highlights
+	vim.api.nvim_set_hl(0, "RemoraLocalCommit", { link = "String", default = true })
+	vim.api.nvim_set_hl(0, "RemoraLocalHeader", { link = "Statement", default = true })
+
+	-- Define signs
+	vim.fn.sign_define("RemoraDiffAdd", { text = "+", texthl = "RemoraDiffSignAdd" })
+	vim.fn.sign_define("RemoraDiffDelete", { text = "-", texthl = "RemoraDiffSignDelete" })
+	vim.fn.sign_define("RemoraDiffChange", { text = "~", texthl = "RemoraDiffSignChange" })
 end
 
 -- Get status highlight group

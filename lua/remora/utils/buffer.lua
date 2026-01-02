@@ -25,21 +25,21 @@ end
 -- Set buffer lines
 ---@param bufnr number
 ---@param lines table
----@param opts table|nil {modifiable}
+---@param opts table|nil {modifiable} - final modifiable state after writing
 function M.set_lines(bufnr, lines, opts)
 	opts = opts or {}
 
 	local was_modifiable = vim.api.nvim_buf_get_option(bufnr, "modifiable")
 
-	if opts.modifiable ~= nil then
-		vim.api.nvim_buf_set_option(bufnr, "modifiable", opts.modifiable)
-	else
-		vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
-	end
+	-- 書き込み前は必ずmodifiable=trueにする
+	vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
 
 	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 
-	if opts.modifiable == nil then
+	-- 書き込み後にmodifiable状態を設定
+	if opts.modifiable ~= nil then
+		vim.api.nvim_buf_set_option(bufnr, "modifiable", opts.modifiable)
+	else
 		vim.api.nvim_buf_set_option(bufnr, "modifiable", was_modifiable)
 	end
 end
@@ -74,6 +74,11 @@ end
 ---@param bufnr number
 ---@param name string
 function M.set_name(bufnr, name)
+	-- 同名バッファが存在する場合は削除
+	local existing = vim.fn.bufnr(name)
+	if existing ~= -1 and existing ~= bufnr then
+		pcall(vim.api.nvim_buf_delete, existing, { force = true })
+	end
 	vim.api.nvim_buf_set_name(bufnr, name)
 end
 

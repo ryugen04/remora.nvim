@@ -97,6 +97,9 @@ function M.open(pr_identifier)
 		-- Initialize state with PR data
 		state.load_pr(pr_data)
 
+		-- Refresh local git changes
+		state.refresh_local_changes()
+
 		-- Open layout
 		layout.open()
 
@@ -145,6 +148,7 @@ function M.refresh()
 		end
 
 		state.load_pr(pr_data)
+		state.refresh_local_changes()
 		events.emit(events.PR_REFRESHED, pr_data)
 		vim.notify("PR refreshed", vim.log.levels.INFO)
 	end)

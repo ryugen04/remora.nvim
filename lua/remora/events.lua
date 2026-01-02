@@ -16,6 +16,7 @@ M.COMMENT_DELETED = "comment_deleted"
 M.NOTE_ADDED = "note_added"
 M.REVIEW_SUBMITTED = "review_submitted"
 M.AI_REVIEW_COMPLETED = "ai_review_completed"
+M.LOCAL_CHANGES_UPDATED = "local_changes_updated"
 
 -- Event listeners
 local listeners = {}

@@ -134,8 +134,24 @@ function M.fetch_pr(owner, repo, number, callback)
                 login
               }
               createdAt
+            }
+          }
+          reviewThreads(first: 100) {
+            nodes {
+              id
+              isResolved
               path
-              position
+              line
+              comments(first: 50) {
+                nodes {
+                  id
+                  body
+                  author {
+                    login
+                  }
+                  createdAt
+                }
+              }
             }
           }
           reviews(first: 50) {
@@ -178,6 +194,7 @@ function M.fetch_pr(owner, repo, number, callback)
 			updated_at = pr.updatedAt,
 			files = {},
 			comments = {},
+			review_threads = {},
 			reviews = {},
 		}
 
@@ -191,23 +208,41 @@ function M.fetch_pr(owner, repo, number, callback)
 			})
 		end
 
-		-- Parse comments
+		-- Parse comments (general PR comments, not tied to code)
 		for _, comment in ipairs(pr.comments.nodes or {}) do
 			table.insert(pr_data.comments, {
 				id = comment.id,
 				body = comment.body,
-				author = comment.author.login,
+				author = comment.author and comment.author.login or "[deleted]",
 				created_at = comment.createdAt,
-				path = comment.path,
-				position = comment.position,
 			})
+		end
+
+		-- Parse review threads (comments tied to specific code locations)
+		for _, thread in ipairs(pr.reviewThreads.nodes or {}) do
+			local thread_data = {
+				id = thread.id,
+				is_resolved = thread.isResolved,
+				path = thread.path,
+				line = thread.line,
+				comments = {},
+			}
+			for _, comment in ipairs(thread.comments.nodes or {}) do
+				table.insert(thread_data.comments, {
+					id = comment.id,
+					body = comment.body,
+					author = comment.author and comment.author.login or "[deleted]",
+					created_at = comment.createdAt,
+				})
+			end
+			table.insert(pr_data.review_threads, thread_data)
 		end
 
 		-- Parse reviews
 		for _, review in ipairs(pr.reviews.nodes or {}) do
 			table.insert(pr_data.reviews, {
 				id = review.id,
-				author = review.author.login,
+				author = review.author and review.author.login or "[deleted]",
 				state = review.state,
 				body = review.body or "",
 				created_at = review.createdAt,

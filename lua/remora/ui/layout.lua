@@ -12,6 +12,7 @@ M.windows = {
 	left = nil,
 	center = nil,
 	right = nil,
+	center_diff = nil,
 }
 
 M.buffers = {
@@ -89,6 +90,10 @@ function M.close()
 		return
 	end
 
+	-- Cleanup center pane diff
+	local center_pane = require("remora.ui.center_pane")
+	center_pane.cleanup_diff()
+
 	-- Close windows
 	window_utils.close(M.windows.left)
 	window_utils.close(M.windows.right)
@@ -98,7 +103,7 @@ function M.close()
 	buffer_utils.delete(M.buffers.right)
 
 	-- Reset state
-	M.windows = { left = nil, center = nil, right = nil }
+	M.windows = { left = nil, center = nil, right = nil, center_diff = nil }
 	M.buffers = { left = nil, right = nil }
 	M.is_open = false
 end

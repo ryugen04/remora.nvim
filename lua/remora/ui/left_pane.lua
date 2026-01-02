@@ -8,6 +8,7 @@ local buffer_utils = require("remora.utils.buffer")
 local tree = require("remora.ui.components.tree")
 local pr_home = require("remora.ui.components.pr_home")
 local memos = require("remora.ui.components.memos")
+local local_changes = require("remora.ui.components.local_changes")
 
 -- Pane state
 M.bufnr = nil
@@ -49,6 +50,10 @@ function M.init(bufnr)
 	events.on(events.NOTE_ADDED, function()
 		M.render()
 	end)
+
+	events.on(events.LOCAL_CHANGES_UPDATED, function()
+		M.render()
+	end)
 end
 
 -- Render left pane
@@ -61,19 +66,13 @@ function M.render()
 	M.line_metadata = {}
 
 	-- PR Home section
-	table.insert(
-		lines,
-		"═══════════════════════════════════════"
-	)
+	table.insert(lines, "═══════════════════════════════════════")
 	table.insert(M.line_metadata, { type = "separator" })
 
 	table.insert(lines, "  PR Home")
 	table.insert(M.line_metadata, { type = "section_header", section = "pr_home" })
 
-	table.insert(
-		lines,
-		"═══════════════════════════════════════"
-	)
+	table.insert(lines, "═══════════════════════════════════════")
 	table.insert(M.line_metadata, { type = "separator" })
 
 	local pr_lines = pr_home.render_summary()
@@ -86,20 +85,14 @@ function M.render()
 	table.insert(M.line_metadata, { type = "blank" })
 
 	-- Files section
-	table.insert(
-		lines,
-		"═══════════════════════════════════════"
-	)
+	table.insert(lines, "═══════════════════════════════════════")
 	table.insert(M.line_metadata, { type = "separator" })
 
 	local view_mode = state.ui.view_mode
 	table.insert(lines, string.format("  Files (%s)", view_mode))
 	table.insert(M.line_metadata, { type = "section_header", section = "files" })
 
-	table.insert(
-		lines,
-		"═══════════════════════════════════════"
-	)
+	table.insert(lines, "═══════════════════════════════════════")
 	table.insert(M.line_metadata, { type = "separator" })
 
 	local tree_lines, tree_metadata = tree.render(view_mode)
@@ -111,20 +104,33 @@ function M.render()
 	table.insert(lines, "")
 	table.insert(M.line_metadata, { type = "blank" })
 
+	-- Local Changes section
+	table.insert(lines, "═══════════════════════════════════════")
+	table.insert(M.line_metadata, { type = "separator" })
+
+	table.insert(lines, "  Local Changes")
+	table.insert(M.line_metadata, { type = "section_header", section = "local_changes" })
+
+	table.insert(lines, "═══════════════════════════════════════")
+	table.insert(M.line_metadata, { type = "separator" })
+
+	local local_lines, local_metadata = local_changes.render()
+	for i, line in ipairs(local_lines) do
+		table.insert(lines, line)
+		table.insert(M.line_metadata, local_metadata[i])
+	end
+
+	table.insert(lines, "")
+	table.insert(M.line_metadata, { type = "blank" })
+
 	-- Memos section
-	table.insert(
-		lines,
-		"═══════════════════════════════════════"
-	)
+	table.insert(lines, "═══════════════════════════════════════")
 	table.insert(M.line_metadata, { type = "separator" })
 
 	table.insert(lines, "  Memos")
 	table.insert(M.line_metadata, { type = "section_header", section = "memos" })
 
-	table.insert(
-		lines,
-		"═══════════════════════════════════════"
-	)
+	table.insert(lines, "═══════════════════════════════════════")
 	table.insert(M.line_metadata, { type = "separator" })
 
 	local memo_lines = memos.render()
@@ -157,6 +163,12 @@ function M._apply_highlights()
 			buffer_utils.add_highlight(M.bufnr, M.ns, "RemoraSectionTitle", line_idx, 0, -1)
 		elseif metadata.type == "file" and metadata.hl_group then
 			buffer_utils.add_highlight(M.bufnr, M.ns, metadata.hl_group, line_idx, 0, -1)
+		elseif metadata.type == "local_file" and metadata.hl_group then
+			buffer_utils.add_highlight(M.bufnr, M.ns, metadata.hl_group, line_idx, 0, -1)
+		elseif metadata.type == "commit" then
+			buffer_utils.add_highlight(M.bufnr, M.ns, "RemoraLocalCommit", line_idx, 0, -1)
+		elseif metadata.type == "local_changes_header" then
+			buffer_utils.add_highlight(M.bufnr, M.ns, "RemoraLocalHeader", line_idx, 0, -1)
 		end
 	end
 end
@@ -211,36 +223,49 @@ function M._handle_select()
 	end
 
 	if metadata.type == "file" then
-		-- Open file in diffview
+		-- Open PR file diff
 		M._open_file(metadata.path)
+	elseif metadata.type == "local_file" then
+		-- Open local file diff
+		M._open_local_file(metadata.path, metadata.is_staged)
 	elseif metadata.type == "section_header" and metadata.section == "pr_home" then
 		-- Show PR details in center pane
 		M._show_pr_detail()
 	end
 end
 
--- Open file in center pane using diffview
+-- Open local file (show in editor for now)
+---@param file_path string
+---@param is_staged boolean
+function M._open_local_file(file_path, is_staged)
+	-- TODO: ローカルファイルのdiff表示（将来実装）
+	-- 今は単にファイルを開く
+	local full_path = vim.fn.getcwd() .. "/" .. file_path
+	if vim.fn.filereadable(full_path) == 1 then
+		local layout = require("remora.ui.layout")
+		if layout.windows.center and vim.api.nvim_win_is_valid(layout.windows.center) then
+			vim.api.nvim_set_current_win(layout.windows.center)
+			vim.cmd("edit " .. vim.fn.fnameescape(full_path))
+		end
+	else
+		vim.notify("File not found: " .. file_path, vim.log.levels.WARN)
+	end
+end
+
+-- Open file in center pane with diff
 ---@param file_path string
 function M._open_file(file_path)
 	if not state.current_pr then
 		return
 	end
 
-	-- Use diffview integration to open file
-	local diffview = require("remora.integrations.diffview")
+	-- Mark file as viewed
+	state.mark_file_viewed(file_path)
+	events.emit(events.FILE_VIEWED, file_path)
 
-	if not diffview.is_available() then
-		vim.notify("diffview.nvim is not installed. Please install it to view diffs.", vim.log.levels.WARN)
-		return
-	end
-
-	-- Open file in diffview
-	diffview.open_file(file_path, {
-		on_close = function()
-			-- Refresh left pane when diffview closes
-			M.render()
-		end,
-	})
+	-- Open diff in center pane
+	local center_pane = require("remora.ui.center_pane")
+	center_pane.open_file_diff(file_path)
 end
 
 -- Show PR detail in center pane
