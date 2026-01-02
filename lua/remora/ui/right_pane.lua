@@ -49,7 +49,7 @@ function M.render()
 
   -- Mode tabs
   local tabs = {}
-  for i, mode in ipairs(M.modes) do
+  for _, mode in ipairs(M.modes) do
     local is_active = state.ui.right_pane_mode == mode.id
     local bracket_left = is_active and '[' or ' '
     local bracket_right = is_active and ']' or ' '

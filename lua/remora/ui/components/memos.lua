@@ -103,7 +103,7 @@ function M.render_detail()
   local file_notes = state.notes.by_file or {}
   local has_file_notes = false
 
-  for file_path, notes_list in pairs(file_notes) do
+  for _, notes_list in pairs(file_notes) do
     if #notes_list > 0 then
       has_file_notes = true
       break

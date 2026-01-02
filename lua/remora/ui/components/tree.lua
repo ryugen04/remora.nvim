@@ -70,12 +70,10 @@ local function render_tree_recursive(tree, depth, lines, metadata)
 
   for _, node in ipairs(tree) do
     local indent = string.rep('  ', depth)
-    local icon = ''
-    local hl_group = 'RemoraTreeFile'
+    local icon
 
     if node.type == 'dir' then
       icon = ' '
-      hl_group = 'RemoraTreeFolder'
       local line = indent .. icon .. ' ' .. node.name
       table.insert(lines, line)
       table.insert(metadata, { type = 'dir', path = node.name })
@@ -85,7 +83,7 @@ local function render_tree_recursive(tree, depth, lines, metadata)
     else
       -- File
       icon = ' '
-      hl_group = highlight.get_status_highlight(node.state.status)
+      local hl_group = highlight.get_status_highlight(node.state.status)
 
       -- Build badges
       local badges = M.get_file_badges(node.state)

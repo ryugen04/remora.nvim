@@ -30,9 +30,6 @@ function M.open()
     return
   end
 
-  -- Save original window
-  local original_win = vim.api.nvim_get_current_win()
-
   -- Clear the workspace (optional)
   -- vim.cmd('tabnew')
 

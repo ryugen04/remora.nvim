@@ -69,7 +69,7 @@ describe('UI components integration', function()
         state.files['src/main.lua'].viewed = true
         state.files['src/main.lua'].reviewed = true
 
-        local lines, metadata = tree.render('tree')
+        local lines, _ = tree.render('tree')
 
         -- Look for badge symbols
         local has_badge = false
@@ -85,7 +85,7 @@ describe('UI components integration', function()
 
     describe('flat mode rendering', function()
       it('should render flat file list', function()
-        local lines, metadata = tree.render('flat')
+        local lines, _ = tree.render('flat')
 
         assert.is_table(lines)
         assert.equals(2, #lines) -- Two files
@@ -104,7 +104,7 @@ describe('UI components integration', function()
 
     describe('status mode rendering', function()
       it('should group files by status', function()
-        local lines, metadata = tree.render('status')
+        local lines, _ = tree.render('status')
 
         assert.is_table(lines)
         assert.is_true(#lines > 0)
@@ -127,7 +127,7 @@ describe('UI components integration', function()
 
     describe('get_file_at_line', function()
       it('should return file path for file line', function()
-        local lines, metadata = tree.render('flat')
+        local _, metadata = tree.render('flat')
 
         local file_path = tree.get_file_at_line(metadata, 1)
         assert.is_not_nil(file_path)
@@ -135,7 +135,7 @@ describe('UI components integration', function()
       end)
 
       it('should return nil for non-file line', function()
-        local lines, metadata = tree.render('status')
+        local _, metadata = tree.render('status')
 
         -- First line is usually a header
         local file_path = tree.get_file_at_line(metadata, 1)

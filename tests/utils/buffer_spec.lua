@@ -122,9 +122,8 @@ describe('buffer_utils', function()
     it('should set buffer-local keymap', function()
       test_bufnr = buffer_utils.create_scratch()
 
-      local called = false
       buffer_utils.set_keymap(test_bufnr, 'n', 'K', function()
-        called = true
+        -- Keymap callback
       end, { desc = 'Test keymap' })
 
       -- Note: Testing actual keymap execution is complex in tests

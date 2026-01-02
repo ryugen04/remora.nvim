@@ -2,7 +2,6 @@
 
 local M = {}
 
-local state = require('remora.state')
 local config = require('remora.config')
 
 -- Check if codecompanion is available
@@ -23,11 +22,6 @@ function M.start_review(opts)
     opts.on_complete(nil, 'codecompanion.nvim is not installed or not enabled')
     return
   end
-
-  local codecompanion = require('codecompanion')
-
-  -- Build context for injection
-  local context = M._build_review_context(opts.pr, opts.files)
 
   -- Start codecompanion chat with injected context
   vim.notify('Starting AI review with codecompanion...', vim.log.levels.INFO)

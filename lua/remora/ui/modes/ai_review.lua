@@ -178,9 +178,6 @@ end
 
 -- Review current file only
 function M.review_current_file()
-  -- Get current file from center pane or last selected file
-  local current_file = vim.api.nvim_buf_get_name(0)
-
   -- Extract relative path
   -- TODO: Improve file path detection
 
