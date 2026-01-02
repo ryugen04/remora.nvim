@@ -123,20 +123,17 @@ end)
 - [x] **core/parser.lua** - AIレスポンス、diff、PRデスクリプションのパース
 - [x] **state.lua** - グローバル状態管理
 - [x] **utils/buffer.lua** - バッファユーティリティ
+- [x] **utils/window.lua** - ウィンドウ管理
+- [x] **utils/highlight.lua** - シンタックスハイライト
+- [x] **ui/layout.lua** - レイアウト管理
 
 ### 統合テスト
 
 - [x] **events.lua** - イベントシステムの発火と購読
 - [x] **ui/components** - UIコンポーネントのレンダリング
 - [x] **core/github.lua** - GitHub API統合（モック）
-
-### 今後のテスト追加予定
-
-- [ ] utils/window.lua - ウィンドウ管理
-- [ ] utils/highlight.lua - シンタックスハイライト
-- [ ] ui/layout.lua - レイアウト管理
-- [ ] integrations/diffview.lua - diffview統合
-- [ ] integrations/codecompanion.lua - codecompanion統合
+- [x] **integrations/diffview.lua** - diffview統合
+- [x] **integrations/codecompanion.lua** - codecompanion統合
 
 ## 🔍 リント
 

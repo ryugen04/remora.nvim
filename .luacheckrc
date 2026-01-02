@@ -30,3 +30,15 @@ max_line_length = 120
 
 -- Maximum cyclomatic complexity
 max_cyclomatic_complexity = 20
+
+-- Test file specific configuration
+files["tests/**/*_spec.lua"] = {
+  globals = {
+    "describe",
+    "it",
+    "before_each",
+    "after_each",
+    "pending",
+    "assert",
+  },
+}
