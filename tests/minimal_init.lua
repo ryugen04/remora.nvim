@@ -13,3 +13,11 @@ vim.opt.swapfile = false
 
 -- Set data directory for tests
 vim.fn.setenv("XDG_DATA_HOME", "/tmp/remora-test-data")
+
+-- Initialize remora config for tests
+local config = require("remora.config")
+config.setup({
+	storage = {
+		path = "/tmp/remora-test-data",
+	},
+})

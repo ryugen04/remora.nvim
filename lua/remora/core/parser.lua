@@ -95,11 +95,12 @@ function M.parse_diff_positions(diff)
 	local current_line = 0
 	local position = 0
 
-	for line in diff:gmatch("[^\n]+") do
+	-- Split by newline, keeping empty lines
+	for line in (diff .. "\n"):gmatch("([^\n]*)\n") do
 		position = position + 1
 
 		-- Check if this is a hunk header
-		local new_start = line:match("^@@.-\\+(%d+)")
+		local new_start = line:match("^@@.-%+(%d+)")
 		if new_start then
 			current_line = tonumber(new_start)
 		elseif line:match("^%+") and not line:match("^%+%+%+") then
@@ -107,7 +108,7 @@ function M.parse_diff_positions(diff)
 			positions[current_line] = position
 			current_line = current_line + 1
 		elseif not line:match("^%-") then
-			-- Context line
+			-- Context line (including empty lines)
 			current_line = current_line + 1
 		end
 	end
@@ -194,7 +195,8 @@ function M.parse_pr_description(description)
 	end
 
 	-- Extract breaking changes section
-	local breaking = description:match("## Breaking Changes\n(.-)##")
+	local breaking = description:match("## Breaking Changes\n(.-)\n##")
+		or description:match("## Breaking Changes\n(.+)")
 		or description:match("BREAKING CHANGE:%s*(.-)[\n\r][\n\r]")
 
 	if breaking then
@@ -207,7 +209,10 @@ function M.parse_pr_description(description)
 	end
 
 	-- Extract testing notes
-	local testing = description:match("## Testing\n(.-)##") or description:match("## Test Plan\n(.-)##")
+	local testing = description:match("## Testing\n(.-)\n##")
+		or description:match("## Testing\n(.+)")
+		or description:match("## Test Plan\n(.-)\n##")
+		or description:match("## Test Plan\n(.+)")
 
 	if testing then
 		info.testing_notes = vim.trim(testing)
