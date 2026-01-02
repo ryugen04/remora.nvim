@@ -60,8 +60,8 @@ function M._parse_finding_block(block)
     finding.line = tonumber(line)
   else
     -- Try alternate format
-    local file = block:match('File:%s*([^%s\n]+)')
-    local line = block:match('Line:%s*(%d+)')
+    file = block:match('File:%s*([^%s\n]+)')
+    line = block:match('Line:%s*(%d+)')
 
     if file then
       finding.file = file

@@ -88,7 +88,9 @@ describe('GitHub API integration', function()
       end
 
       assert.is_function(test_callback)
-      callback_structure_valid = true
+
+      -- Simulate calling the callback
+      test_callback(nil, nil)
       assert.is_true(callback_structure_valid)
     end)
   end)
@@ -129,24 +131,3 @@ describe('GitHub API integration', function()
     end)
   end)
 end)
-
--- Mock helper for future enhancement
-local function create_mock_pr_response(pr_number)
-  return {
-    id = 'PR_' .. pr_number,
-    number = pr_number,
-    title = 'Test PR ' .. pr_number,
-    body = 'Test description',
-    state = 'OPEN',
-    author = { login = 'testuser' },
-    baseRefName = 'main',
-    headRefName = 'feature-' .. pr_number,
-    baseRefOid = 'base_sha',
-    headRefOid = 'head_sha',
-    createdAt = os.date('%Y-%m-%dT%H:%M:%S'),
-    updatedAt = os.date('%Y-%m-%dT%H:%M:%S'),
-    files = { nodes = {} },
-    comments = { nodes = {} },
-    reviews = { nodes = {} },
-  }
-end
