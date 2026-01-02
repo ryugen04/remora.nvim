@@ -54,10 +54,10 @@ function M._parse_finding_block(block)
   local finding = {}
 
   -- Extract file and line
-  local file_line = block:match('FINDING:%s*([^%s]+):(%d+)')
-  if file_line then
-    finding.file, finding.line = file_line:match('([^:]+):(%d+)')
-    finding.line = tonumber(finding.line)
+  local file, line = block:match('FINDING:%s*([^%s]+):(%d+)')
+  if file and line then
+    finding.file = file
+    finding.line = tonumber(line)
   else
     -- Try alternate format
     local file = block:match('File:%s*([^%s\n]+)')

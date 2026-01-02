@@ -171,9 +171,7 @@ function M.extract_suggestions(response)
   local suggestions = {}
 
   -- Look for code blocks in response
-  for code_block in response:gmatch('```(%w+)\n(.-)```') do
-    local lang, code = code_block:match('(%w+)\n(.+)')
-
+  for lang, code in response:gmatch('```(%w+)\n(.-)```') do
     if lang and code then
       -- Try to extract file/line context before the code block
       local context = response:match('(.-)```' .. lang)
