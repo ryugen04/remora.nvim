@@ -1,0 +1,440 @@
+*remora.txt*  A local PR review tool for Neovim with GitHub integration
+
+Author:  ryugen04
+License: MIT
+Version: 1.0.0
+
+==============================================================================
+CONTENTS                                                      *remora-contents*
+
+    1. Introduction ........................... |remora-introduction|
+    2. Requirements ........................... |remora-requirements|
+    3. Installation ........................... |remora-installation|
+    4. Quick Start ............................ |remora-quickstart|
+    5. Configuration .......................... |remora-configuration|
+    6. Commands ............................... |remora-commands|
+    7. Key Mappings ........................... |remora-mappings|
+    8. Workflow ............................... |remora-workflow|
+    9. Features ............................... |remora-features|
+   10. Functions .............................. |remora-functions|
+   11. Highlights ............................. |remora-highlights|
+   12. FAQ .................................... |remora-faq|
+
+==============================================================================
+1. INTRODUCTION                                          *remora-introduction*
+
+remora.nvim is a comprehensive pull request review tool that runs entirely
+within Neovim. It integrates with GitHub's GraphQL API, diffview.nvim for
+diff visualization, and Claude Code CLI for AI-powered code reviews.
+
+Key Features:
+  • 📋 Three-pane layout for efficient PR navigation
+  • 🌳 Multiple file views (tree, flat, status-grouped)
+  • 💬 Draft and submit GitHub PR comments
+  • 📝 Local memos and TODO lists
+  • 🤖 AI-powered code review assistance
+  • 💾 Persistent local state
+  • 🎨 Rich UI with badges and syntax highlighting
+
+==============================================================================
+2. REQUIREMENTS                                          *remora-requirements*
+
+  • Neovim 0.8+
+  • plenary.nvim (required)
+  • diffview.nvim (required for diff visualization)
+  • codecompanion.nvim (optional, for AI features)
+  • Claude Code CLI (optional, for AI features)
+  • GitHub CLI (gh) or GITHUB_TOKEN environment variable
+
+==============================================================================
+3. INSTALLATION                                          *remora-installation*
+
+Using lazy.nvim: >lua
+    {
+      'ryugen04/remora.nvim',
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+        'sindrets/diffview.nvim',
+        'olimorris/codecompanion.nvim', -- optional
+      },
+      config = function()
+        require('remora').setup({
+          -- Configuration options
+        })
+      end,
+    }
+<
+
+Using packer.nvim: >lua
+    use {
+      'ryugen04/remora.nvim',
+      requires = {
+        'nvim-lua/plenary.nvim',
+        'sindrets/diffview.nvim',
+        'olimorris/codecompanion.nvim', -- optional
+      },
+      config = function()
+        require('remora').setup({})
+      end,
+    }
+<
+
+==============================================================================
+4. QUICK START                                            *remora-quickstart*
+
+1. Authenticate with GitHub: >bash
+    gh auth login
+    # OR set environment variable
+    export GITHUB_TOKEN=ghp_xxxxxxxxxxxxx
+<
+
+2. Open a PR: >vim
+    :RemoraOpen owner/repo#123
+<
+
+3. Navigate and review:
+   • Use <CR> on files to open them in diffview
+   • Press 'r' to mark files as reviewed
+   • Press 'v' to cycle through tree/flat/status views
+   • Press '1-4' in right pane to switch modes
+
+4. Submit review: >vim
+    :RemoraSubmitReview
+<
+
+==============================================================================
+5. CONFIGURATION                                        *remora-configuration*
+
+Default configuration: >lua
+    require('remora').setup({
+      -- Layout
+      layout = {
+        left_width = 40,        -- Left sidebar width
+        right_width = 50,       -- Right sidebar width
+        open_on_startup = false,
+      },
+
+      -- File tree
+      file_tree = {
+        default_mode = 'tree',  -- tree | flat | status
+        icons = true,
+        git_icons = true,
+        show_hidden = false,
+      },
+
+      -- GitHub
+      github = {
+        token = nil,            -- nil = auto-detect from gh CLI or env
+        api_url = 'https://api.github.com/graphql',
+      },
+
+      -- AI
+      ai = {
+        claude_cli_path = 'claude',
+        codecompanion_enabled = true,
+        auto_review = false,
+      },
+
+      -- Storage
+      storage = {
+        path = vim.fn.stdpath('data') .. '/remora',
+      },
+
+      -- Keymaps
+      keymaps = {
+        toggle = '<leader>rt',
+        refresh = '<leader>rr',
+        submit_review = '<leader>rs',
+      },
+
+      -- UI
+      ui = {
+        badges = {
+          viewed = '👀',
+          reviewed = '✅',
+          commented = '💬',
+          noted = '📝',
+          pinned = '📌',
+          ai_reviewed = '🤖',
+        },
+        comment_display = 'hover', -- hover | inline | both
+      },
+    })
+<
+
+Configuration Options:
+
+*remora-config-layout*
+layout.left_width           Width of left sidebar (default: 40)
+layout.right_width          Width of right sidebar (default: 50)
+layout.open_on_startup      Auto-open on Neovim startup (default: false)
+
+*remora-config-file-tree*
+file_tree.default_mode      Default view mode (default: 'tree')
+file_tree.icons             Show file icons (default: true)
+file_tree.git_icons         Show git status icons (default: true)
+file_tree.show_hidden       Show hidden files (default: false)
+
+*remora-config-github*
+github.token                GitHub token (default: auto-detect)
+github.api_url              GitHub API URL (default: GitHub.com)
+
+*remora-config-ai*
+ai.claude_cli_path          Path to Claude CLI (default: 'claude')
+ai.codecompanion_enabled    Enable codecompanion integration (default: true)
+ai.auto_review              Auto-start AI review on PR load (default: false)
+
+*remora-config-storage*
+storage.path                Path for local data storage
+
+==============================================================================
+6. COMMANDS                                                  *remora-commands*
+
+*:RemoraOpen* [owner/repo#num]
+    Open PR review. Auto-detects from git remote if argument is omitted.
+    Example: >vim
+        :RemoraOpen facebook/react#12345
+<
+
+*:RemoraClose*
+    Close remora layout and buffers.
+
+*:RemoraToggle*
+    Toggle remora layout open/closed.
+
+*:RemoraRefresh*
+    Refresh PR data from GitHub API.
+
+*:RemoraSubmitReview*
+    Submit review to GitHub with all draft comments.
+
+==============================================================================
+7. KEY MAPPINGS                                              *remora-mappings*
+
+Left Pane Navigation:                                 *remora-left-pane-keys*
+
+    <CR>        Open file in diffview or show PR detail
+    r           Toggle file reviewed status
+    v           Cycle view mode (tree/flat/status)
+    R           Refresh PR from GitHub
+    q           Close remora
+
+Right Pane Modes:                                    *remora-right-pane-keys*
+
+    1           Switch to AI Review mode
+    2           Switch to AI Ask mode
+    3           Switch to PR Comments mode
+    4           Switch to Local Memo mode
+    <Tab>       Next mode
+    <S-Tab>     Previous mode
+
+AI Review Mode:                                       *remora-ai-review-keys*
+
+    r           Start full PR review
+    f           Review current file only
+    c           Clear review results
+    e           Export AI findings as draft comments
+
+AI Ask Mode:                                             *remora-ai-ask-keys*
+
+    a           Ask a question
+    c           Clear conversation
+
+PR Comments Mode:                                    *remora-pr-comments-keys*
+
+    e           Edit comment
+    d           Delete comment
+    s           Submit review to GitHub
+
+Local Memo Mode:                                        *remora-memo-keys*
+
+    a           Add TODO
+    n           Add note
+    d           Delete note/TODO
+    t           Toggle TODO completion
+
+Diffview Keybindings:                                  *remora-diffview-keys*
+
+    <leader>rc  Add review comment at cursor
+    <leader>rs  Add suggestion from visual selection
+
+==============================================================================
+8. WORKFLOW                                                  *remora-workflow*
+
+Basic Review Workflow:                            *remora-basic-workflow*
+
+1. Load PR: >vim
+    :RemoraOpen owner/repo#123
+<
+2. Browse files in left pane
+3. Review files:
+   • Press <CR> to open in diffview
+   • Review changes
+   • Press 'r' to mark as reviewed
+4. Add comments (in diffview with <leader>rc)
+5. Submit review: >vim
+    :RemoraSubmitReview
+<
+
+AI-Enhanced Workflow:                               *remora-ai-workflow*
+
+1. Load PR: >vim
+    :RemoraOpen owner/repo#123
+<
+2. Switch to AI Review mode ('1' in right pane)
+3. Request review ('r' for full PR or 'f' for current file)
+4. Review AI suggestions in right pane
+5. Export findings as draft comments ('e')
+6. Add your own comments
+7. Submit review: >vim
+    :RemoraSubmitReview
+<
+
+Local Notes Workflow:                              *remora-notes-workflow*
+
+1. Switch to Memo mode ('4' in right pane)
+2. Add TODO ('a') or note ('n')
+3. View all memos in right pane
+4. Toggle TODO completion ('t')
+5. Notes saved locally in ~/.local/share/nvim/remora/
+
+==============================================================================
+9. FEATURES                                                  *remora-features*
+
+File View Modes:                                        *remora-view-modes*
+
+Tree Mode (default): ~
+>
+    src/
+      components/
+        Button.tsx ✅
+        Input.tsx 👀
+      utils/
+        helpers.ts 💬
+<
+
+Flat Mode: ~
+>
+    src/components/Button.tsx ✅
+    src/components/Input.tsx 👀
+    src/utils/helpers.ts 💬
+<
+
+Status Mode: ~
+>
+    ▼ Modified (2)
+        src/components/Button.tsx ✅
+        src/utils/helpers.ts 💬
+
+    ▼ Added (1)
+        src/components/Input.tsx 👀
+<
+
+Badges:                                                    *remora-badges*
+
+    👀  Viewed       - File has been opened
+    ✅  Reviewed     - File marked as reviewed
+    💬  Commented    - Has PR comments
+    📝  Noted        - Has local notes/TODOs
+    📌  Pinned       - Pinned for attention
+    🤖  AI Reviewed  - AI review completed
+
+==============================================================================
+10. FUNCTIONS                                              *remora-functions*
+
+*remora.setup({config})*
+    Setup remora with configuration options.
+    Parameters: ~
+        {config}  (table) Configuration options
+
+*remora.open({pr_spec})*
+    Open a PR for review.
+    Parameters: ~
+        {pr_spec}  (string) PR specification (owner/repo#number)
+
+*remora.close()*
+    Close remora layout.
+
+*remora.toggle()*
+    Toggle remora layout.
+
+*remora.refresh()*
+    Refresh PR data from GitHub.
+
+*remora.submit_review()*
+    Submit review to GitHub.
+
+==============================================================================
+11. HIGHLIGHTS                                            *remora-highlights*
+
+PR Status Highlights: ~
+    RemoraTitle              Title text
+    RemoraComment            Comment text
+    RemoraString             String values
+    RemoraNumber             Number values
+
+File Status Highlights: ~
+    RemoraFileAdded          Added files
+    RemoraFileModified       Modified files
+    RemoraFileDeleted        Deleted files
+    RemoraFileRenamed        Renamed files
+
+Badge Highlights: ~
+    RemoraBadgeViewed        Viewed badge
+    RemoraBadgeReviewed      Reviewed badge
+    RemoraBadgeCommented     Comment badge
+    RemoraBadgeNoted         Note badge
+    RemoraBadgePinned        Pinned badge
+    RemoraBadgeAI            AI review badge
+
+Tree Highlights: ~
+    RemoraTreeFolder         Folder names
+    RemoraTreeFile           File names
+    RemoraTreeSelected       Selected item
+
+Section Highlights: ~
+    RemoraSectionTitle       Section titles
+    RemoraSectionSeparator   Section separators
+
+Mode Highlights: ~
+    RemoraModeActive         Active mode tab
+    RemoraModeInactive       Inactive mode tab
+
+Diff Highlights: ~
+    RemoraDiffAdd            Added lines
+    RemoraDiffDelete         Deleted lines
+    RemoraDiffChange         Changed lines
+
+==============================================================================
+12. FAQ                                                          *remora-faq*
+
+Q: Does this work with private repositories?
+A: Yes, as long as your GitHub token has appropriate permissions.
+
+Q: Can I use this without AI features?
+A: Yes! AI features are optional. The core PR review workflow works
+   independently of AI integration.
+
+Q: Does this support GitHub Enterprise?
+A: Yes, configure `github.api_url` to your GHE GraphQL API endpoint.
+
+Q: How do I auto-detect PR from current branch?
+A: Currently manual specification is required. Use: >vim
+    :RemoraOpen owner/repo#123
+<
+   Auto-detection from git branch is planned for a future update.
+
+Q: Where is review data stored?
+A: All review data is stored locally in:
+   ~/.local/share/nvim/remora/reviews/{owner}_{repo}_{pr_number}/
+
+Q: How do I customize badges?
+A: Configure the `ui.badges` table in your setup call. See
+   |remora-configuration| for details.
+
+Q: Can I review multiple PRs simultaneously?
+A: Currently, one PR at a time is supported. Multi-PR support is planned
+   for a future release.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
