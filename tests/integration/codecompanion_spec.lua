@@ -221,7 +221,7 @@ code2
 					head_branch = "feature",
 				},
 				files = {},
-				on_complete = function(result, err)
+				on_complete = function(_, err)
 					called = true
 					assert.is_not_nil(err)
 				end,
@@ -243,7 +243,7 @@ code2
 					number = 123,
 				},
 				patch = "diff content",
-				on_complete = function(result, err)
+				on_complete = function(_, err)
 					called = true
 					assert.is_not_nil(err)
 				end,

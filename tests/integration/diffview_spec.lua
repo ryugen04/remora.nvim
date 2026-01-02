@@ -197,7 +197,7 @@ describe("diffview integration", function()
 
 			-- Mock vim.ui.input to cancel
 			local original_input = vim.ui.input
-			vim.ui.input = function(opts, callback)
+			vim.ui.input = function(_, callback)
 				callback(nil) -- User cancelled
 			end
 
@@ -215,7 +215,7 @@ describe("diffview integration", function()
 
 			-- Mock vim.ui.input to cancel
 			local original_input = vim.ui.input
-			vim.ui.input = function(opts, callback)
+			vim.ui.input = function(_, callback)
 				callback(nil) -- User cancelled
 			end
 
