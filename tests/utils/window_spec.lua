@@ -160,10 +160,6 @@ describe("window utilities", function()
 	describe("focus", function()
 		it("should focus the specified window", function()
 			local winnr = window.create_split({ position = "right" })
-			local original_win = vim.api.nvim_get_current_win()
-
-			-- Should not be focused initially if we have return_to_current behavior
-			-- But let's test focusing explicitly
 
 			window.focus(winnr)
 			local current_win = vim.api.nvim_get_current_win()
