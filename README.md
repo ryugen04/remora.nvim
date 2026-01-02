@@ -328,6 +328,40 @@ remora.nvim/
 │       └── components/       # UI components
 ```
 
+## Testing
+
+remora.nvim includes comprehensive unit and integration tests.
+
+### Running Tests
+
+```bash
+# Install test dependencies
+make install-deps
+
+# Run all tests
+make test
+
+# Run unit tests only
+make test-unit
+
+# Run integration tests only
+make test-integration
+
+# Run specific test file
+make test-file FILE=tests/core/storage_spec.lua
+
+# Lint code
+make lint
+```
+
+### Test Coverage
+
+- ✅ **Unit Tests**: core modules (storage, parser), state management, utils
+- ✅ **Integration Tests**: events system, UI components, GitHub API (mocked)
+- ✅ **CI/CD**: GitHub Actions with Neovim stable and nightly
+
+See [tests/README.md](tests/README.md) for detailed test documentation.
+
 ## Contributing
 
 Contributions welcome! This plugin is in active development.
@@ -337,14 +371,8 @@ Contributions welcome! This plugin is in active development.
 1. Clone the repository
 2. Install dependencies (plenary, diffview)
 3. Read [ARCHITECTURE.md](./ARCHITECTURE.md)
-4. Check open issues or create a new one
-
-### Testing
-
-```bash
-# Run tests (coming soon)
-make test
-```
+4. Run tests: `make test`
+5. Check open issues or create a new one
 
 ## FAQ
 
