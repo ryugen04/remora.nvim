@@ -208,13 +208,21 @@ function M._open_file(file_path)
     return
   end
 
-  -- Mark file as viewed
-  state.mark_file_viewed(file_path)
-  events.emit(events.FILE_VIEWED, file_path)
+  -- Use diffview integration to open file
+  local diffview = require('remora.integrations.diffview')
 
-  -- TODO: Open in diffview in center pane
-  -- For now, just notify
-  vim.notify('Opening ' .. file_path .. ' (diffview integration pending)', vim.log.levels.INFO)
+  if not diffview.is_available() then
+    vim.notify('diffview.nvim is not installed. Please install it to view diffs.', vim.log.levels.WARN)
+    return
+  end
+
+  -- Open file in diffview
+  diffview.open_file(file_path, {
+    on_close = function()
+      -- Refresh left pane when diffview closes
+      M.render()
+    end,
+  })
 end
 
 -- Show PR detail in center pane
